@@ -1,9 +1,11 @@
 package com.sohatask.rabbitmq.controller;
 
 
-import com.sohatask.rabbitmq.consumer.Receiver;
-import com.sohatask.rabbitmq.producer.Publisher;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.sohatask.rabbitmq.domain.Person;
+import com.sohatask.rabbitmq.service.RabbitMQSender;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,14 +14,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class PublisherController {
 
-    @GetMapping("/get-data")
-    public void getData() {
-        try {
-            Publisher.publish();
-            Receiver.receive(PublisherController.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+    private final RabbitMQSender rabbitMQSender;
+
+    public PublisherController(RabbitMQSender rabbitMQSender) {
+        this.rabbitMQSender = rabbitMQSender;
+    }
+
+    @PostMapping("/get-person")
+    public String getPerson(@RequestBody Person person) {
+
+        rabbitMQSender.send(person);
+        return "successfully sent !";
     }
 
 }
